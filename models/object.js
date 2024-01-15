@@ -8,13 +8,18 @@ const objectBluePrint = mongoose.Schema(
             match: [/^[a-zA-Z]*$/, 'A title must contain only letters'],
         },
         author:{
-            type: String,
-            required: true,
+            type: mongoose.Schema.Types.ObjectId,
+            ref:'Author',
+            required:  [true, "Enter the author:"],
         },
         euros:{
             type: Number,
-            required: true,
-            default: 0,
+            required: [true, "Enter the euros:"],
+            
+            validate: {
+                    validator: Number.isInteger,
+                    message: 'Euros must be an numbers!!',
+                        },
         }, 
         image:{
             type: String,

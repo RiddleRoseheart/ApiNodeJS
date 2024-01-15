@@ -3,6 +3,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const Object = require('./models/object')
+const Author = require('./models/author');
 const app = express()
 
 app.use(express.json())
@@ -107,7 +108,79 @@ app.get('/objects/search', async(req, res)=>{
         res.status(500).json({error: 'Internal Server Error',message: error.message})
     }
  });
+    ///////////////////////////////////////////////// 
+
+
+    // HERE WE HAVE THE CRUD OPERATIONS FOR OUR AUTHORS!!!!!
+
+
+    app.post('/authors', async (req, res) => {
+        try {
+            const author = await Author.create(req.body);
+            res.status(201).json(author);
+        } catch (error) {
+            console.error(error.message);
+            res.status(500).json({ error: 'Internal Server Error', message: error.message });
+        }
+    });
+    app.get('/authors', async (req, res) => {
+        try {
+            const authors = await Author.find({});
+            res.status(200).json(authors);
+        } catch (error) {
+            res.status(500).json({ error: 'Internal Server Error', message: error.message });
+        }
+    });
+
     
+app.get('/authors/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const author = await Author.findById(id);
+        if (!author) {
+            return res.status(404).json({ error: 'Not Found', message: `No author with ID ${id}` });
+        }
+        res.status(200).json(author);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    }
+});
+
+app.put('/authors/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedAuthor = await Author.findByIdAndUpdate(id, req.body, { new: true });
+        if (!updatedAuthor) {
+            return res.status(404).json({ error: 'Not Found', message: `No author with ID ${id}` });
+        }
+        res.status(200).json(updatedAuthor);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    }
+});
+
+app.delete('/authors/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedAuthor = await Author.findByIdAndDelete(id);
+        if (!deletedAuthor) {
+            return res.status(404).json({ error: 'Not Found', message: `No author with ID ${id}` });
+        }
+        res.status(200).json(deletedAuthor);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    }
+});
+
+
+
+
+
+
+
+
+
+
 mongoose.connect('mongodb+srv://Koko:Lol123@cluster0.ksclk6k.mongodb.net/nodeJs?retryWrites=true&w=majority',
 {
     useNewUrlParser: true,
