@@ -36,7 +36,7 @@ app.get('/objects/search/:title', async(req, res)=>{
 app.get('/objects/:id', async(req, res)=>{
     try{
         const {id}= req.params;
-        const object = await Object.findById();
+        const object = await Object.findById(id);
         if (!object) {
             return res.status(404).json({ error: 'Not Found', message: `No Book with ID ${id}` });
         }
@@ -65,7 +65,7 @@ app.put('/objects/:id', async (req, res) => {
         if (!updatedObject) {
             return res.status(404).json({ error: 'Not Found', message: `No BOOK with ID ${id}` });
         }
-        res.status(200).json(updatedItem);
+        res.status(200).json(updatedObject);
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error', message: error.message });
     }
@@ -100,9 +100,8 @@ app.get('/objects', async(req, res)=>{
 
 app.get('/objects/search', async(req, res)=>{
     try{
-        const { q } = req.query;
-        const encodedQ = encodeURIComponent(q);
-        const objects = await Object.find({ $or: [{ title: encodedQ }, { author: encodedQ }] });
+        const { q} = req.query;
+        const objects = await Object.find({ $or: [{ title: q }, { author: q }] });
         res.status(200).json(objects);
     }catch(error){
         res.status(500).json({error: 'Internal Server Error',message: error.message})
@@ -179,7 +178,10 @@ app.delete('/authors/:id', async (req, res) => {
 
 
 
-
+app.use(function (err, req, res, next) {
+    console.error(err.stack)
+    res.status(500).send('Something broke!')
+   })
 
 mongoose.connect('mongodb+srv://Koko:Lol123@cluster0.ksclk6k.mongodb.net/nodeJs?retryWrites=true&w=majority',
 {
