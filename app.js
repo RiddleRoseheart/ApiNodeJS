@@ -12,7 +12,7 @@ app.get('/', (request, res)=>{
     res.send('Hello, welcome to the API!')
 })
 
-app.get('/objects/:id', async(req, res)=>{
+app.get('/objects', async(req, res)=>{
     try{
 const objects = await Object.find({});
 res.status(200).json(objects);
@@ -21,19 +21,25 @@ res.status(200).json(objects);
     }
 })
 
-
-
-
+app.get('/objects/search/:title', async(req, res)=>{
+    try{
+        const { title } = req.params;
+        const objects = await Object.find({ title });
+        res.status(200).json(objects);
+    }catch(error){
+        res.status(500).json({error: 'Internal Server Error',message: error.message})
+    }
+})
 
 
 app.get('/objects/:id', async(req, res)=>{
     try{
         const {id}= req.params;
         const object = await Object.findById();
-        if (!item) {
-            return res.status(404).json({ error: 'Not Found', message: `No item with ID ${id}` });
+        if (!object) {
+            return res.status(404).json({ error: 'Not Found', message: `No Book with ID ${id}` });
         }
-        res.status(200).json(item);
+        res.status(200).json(object);
     }catch(error) {
         res.status(500).json({error: 'Internal Server Error',message: error});
 }});
@@ -41,7 +47,7 @@ app.get('/objects/:id', async(req, res)=>{
 app.post('/objects', async(req, res)=>{
     try{
 
-        const object = await Object.create(req.body)
+        const object = await Object.create(req.body);
         res.status(201).json(object);
     }catch(error){
         console.log(error.message);
@@ -56,7 +62,7 @@ app.put('/objects/:id', async (req, res) => {
         const { id } = req.params;
         const updatedObject = await Object.findByIdAndUpdate(id, req.body, { new: true });
         if (!updatedObject) {
-            return res.status(404).json({ error: 'Not Found', message: `No item with ID ${id}` });
+            return res.status(404).json({ error: 'Not Found', message: `No BOOK with ID ${id}` });
         }
         res.status(200).json(updatedItem);
     } catch (error) {
@@ -70,7 +76,7 @@ app.delete('/objects/:id', async(req, res)=>{
         const{id} = req.params;
         const deletedObject = await Object.findByIdAndDelete(id);
         if(!deletedObject){
-            return res.status(404).json({error: 'Not Found',message:'cant find object with following id ${id}'})
+            return res.status(404).json({error: 'Not Found',message:'cant find book with following id ${id}'})
 
     }res.status(200).json(deletedObject);
 }
@@ -79,8 +85,28 @@ catch(error){
             
         }});
 
+//pagination
+app.get('/objects', async(req, res)=>{
+    try{
+        const { limit = 10, offset = 0 } = req.query;
+        const objects = await Object.find().skip(parseInt(offset)).limit(parseInt(limit));
+        res.status(200).json(objects);
+    }catch(error){
+        res.status(500).json({error: 'Internal Server Error',message: error.message})
+    }
+});
 
 
+app.get('/objects/search', async(req, res)=>{
+    try{
+        const { q } = req.query;
+        const encodedQ = encodeURIComponent(q);
+        const objects = await Object.find({ $or: [{ title: encodedQ }, { author: encodedQ }] });
+        res.status(200).json(objects);
+    }catch(error){
+        res.status(500).json({error: 'Internal Server Error',message: error.message})
+    }
+ });
     
 mongoose.connect('mongodb+srv://Koko:Lol123@cluster0.ksclk6k.mongodb.net/nodeJs?retryWrites=true&w=majority',
 {

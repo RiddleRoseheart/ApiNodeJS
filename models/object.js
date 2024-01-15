@@ -4,7 +4,8 @@ const objectBluePrint = mongoose.Schema(
     {
         title:{
             type: String,
-            required : [true, "Enter the title:"]
+            required : [true, "Enter the title:"],
+            match: [/^[a-zA-Z]*$/, 'A title must contain only letters'],
         },
         author:{
             type: String,
